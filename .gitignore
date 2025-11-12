@@ -1,0 +1,217 @@
+# NEUROSYMBOLIC VQA 
+
+
+# datasets
+datasets/clevr/images/
+datasets/clevr/scenes/
+datasets/clevr/questions/
+datasets/clevr/*.zip
+
+datasets/gqa/images/
+datasets/gqa/sceneGraphs/
+datasets/gqa/questions/
+datasets/gqa/*.zip
+
+# sample data
+datasets/*/samples.jsonl
+datasets/*/samples_full.jsonl
+
+# zip
+*.zip
+*.tar.gz
+*.tar
+*.rar
+*.7z
+
+!datasets/*/samples_mini.jsonl
+!datasets/*/test_samples.jsonl
+
+
+# jupyter notebooks 
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+.ipynb_cache/
+
+
+# cache
+perception_cache/
+*_cache/
+*.cache
+cache/
+
+# storeage
+store/
+*.db
+*.sqlite
+*.sqlite3
+
+# CLIP embeddings 
+clip_cache/
+embeddings/
+*.npy
+*.npz
+
+# Masks 
+masks/
+segmentation_cache/
+
+
+# models
+models/**/*.pth
+models/**/*.pt
+models/**/*.bin
+models/**/*.safetensors
+
+# ONNX modeli
+models/**/*.onnx
+
+# Llama models
+models/**/*.gguf
+models/**/*.ggml
+
+# Fine-tuned models
+ft/
+fine_tuning/checkpoints/
+checkpoints/
+
+# Hugging Face cache
+models/hub/
+.cache/huggingface/
+
+# ALI DOZVOLI config fajlove i dokumentaciju
+!models/**/config.json
+!models/**/tokenizer_config.json
+!models/**/README.md
+!models/**/.gitkeep
+
+
+# generated things
+gen/outputs/
+generation/outputs/
+generated_images/
+
+
+!plots/*.png
+!plots/*.pdf
+!plots/*.svg
+
+
+# res
+results/*.jsonl
+results/*_full.json
+results/*_detailed.json
+
+# Execution logs
+exec_logs/
+logs/agent/
+logs/execution/
+
+!results/*_stats.json
+!results/*_metrics.json
+!results/*_summary.json
+
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# virtual environments
+venv/
+env/
+ENV/
+.venv/
+virtualenv/
+
+# Conda environments
+conda-meta/
+
+
+# vs code
+.vscode/
+.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+
+*.sublime-project
+*.sublime-workspace
+
+
+# win
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# LOGS
+*.log
+logs/
+*.out
+*.err
+
+!logs/examples/
+!logs/*.md
+
+# temp
+tmp/
+temp/
+.tmp/
+
+# backup files
+*.bak
+*.backup
+*~
+
+*.prof
+*.lprof
+profile_*.txt
+
+# coverage reports
+.coverage
+htmlcov/
+*.cover
+
+# collab 
+colab_checkpoints/
+*.ipynb.bak
+
+
+sg/detected/*.json
+
+!sg/examples/*.json
+
+
+eval/detailed_logs/
+
+test_outputs/
+
+
+# secrets
+.env
+.env.local
+*.key
+secrets.json
+credentials.json
+*.pem
+*.ppk
+
