@@ -129,7 +129,7 @@ def convert_gqa_split(questions_path, scenes_path, images_dir, output_path, spli
 def main():
     base_path = Path(__file__).resolve().parent
     gqa_dir = base_path / "gqa"
-    output_dir = base_path / "processed"
+    output_dir = base_path / "converted" / "gqa"
     splits = ["train", "val"]
     scene_limit = None
     no_scenes = False 
