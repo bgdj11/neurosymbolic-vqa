@@ -12,6 +12,9 @@ datasets/gqa/sceneGraphs/
 datasets/gqa/questions/
 datasets/gqa/*.zip
 
+# converted datasets (JSONL files are too large for Git)
+datasets/converted/
+
 # sample data
 datasets/*/samples.jsonl
 datasets/*/samples_full.jsonl
