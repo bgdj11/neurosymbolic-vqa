@@ -15,7 +15,6 @@ Unified format:
 """   
 
 import json
-import argparse
 from pathlib import Path
 from tqdm import tqdm
 from collections import defaultdict
