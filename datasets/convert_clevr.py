@@ -7,6 +7,7 @@ Unified format:
     "question": "What is the color of the cube?",
     "answer": "red",
     "image_path": "datasets/clevr/images/train/CLEVR_train_000000.png",
+    "image_id": image_filename.replace('.png', ''),
     "scene_graph": {...},
     "program": [...],
     "metadata": {...}
@@ -82,6 +83,7 @@ def convert_clevr_split(questions_path, scenes_path, images_dir, output_path, sp
                     "question": question.get('question', ''),
                     "answer": question.get('answer', ''),
                     "image_path": image_path,
+                    "image_id": image_filename.replace('.png', ''),
                     "scene_graph": {
                         "objects": scene.get('objects', []),
                         "relationships": scene.get('relationships', {}),
@@ -93,7 +95,6 @@ def convert_clevr_split(questions_path, scenes_path, images_dir, output_path, sp
                         "image_index": question.get('image_index'),
                         "question_index": question.get('question_index'),
                         "question_family_index": question.get('question_family_index'),
-                        "split": question.get('split', split_name),
                     }
                 }
 
