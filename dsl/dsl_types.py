@@ -140,7 +140,7 @@ OPERATOR_SIGNATURES: Dict[str, OperatorSignature] = {
     ),
     'equal_color': OperatorSignature(
         name='equal_color',
-        inputs=[DataType.OBJECT_SET, DataType.OBJECT_SET],
+        inputs=[DataType.ATTRIBUTE, DataType.ATTRIBUTE],
         value_inputs=[],
         side_inputs=None,
         output=DataType.BOOL,
@@ -148,7 +148,7 @@ OPERATOR_SIGNATURES: Dict[str, OperatorSignature] = {
     ),
     'equal_shape': OperatorSignature(
         name='equal_shape',
-        inputs=[DataType.OBJECT_SET, DataType.OBJECT_SET],
+        inputs=[DataType.ATTRIBUTE, DataType.ATTRIBUTE],
         value_inputs=[],
         side_inputs=None,
         output=DataType.BOOL,
@@ -156,7 +156,7 @@ OPERATOR_SIGNATURES: Dict[str, OperatorSignature] = {
     ),
     'equal_size': OperatorSignature(
         name='equal_size',
-        inputs=[DataType.OBJECT_SET, DataType.OBJECT_SET],
+        inputs=[DataType.ATTRIBUTE, DataType.ATTRIBUTE],
         value_inputs=[],
         side_inputs=None,
         output=DataType.BOOL,
@@ -164,7 +164,7 @@ OPERATOR_SIGNATURES: Dict[str, OperatorSignature] = {
     ),
     'equal_material': OperatorSignature(
         name='equal_material',
-        inputs=[DataType.OBJECT_SET, DataType.OBJECT_SET],
+        inputs=[DataType.ATTRIBUTE, DataType.ATTRIBUTE],
         value_inputs=[],
         side_inputs=None,
         output=DataType.BOOL,
