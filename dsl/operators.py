@@ -70,44 +70,16 @@ def exist(scene_graph: SceneGraph, objects: List[int]) -> bool:
     return len(objects) > 0
 
 
-def equal_color(scene_graph: SceneGraph, objects1: List[int], objects2: List[int]) -> bool:
-    if len(objects1) != 1 or len(objects2) != 1:
-        raise ValueError(
-            f"equal_color expects 1 object in each set, "
-            f"got {len(objects1)} and {len(objects2)}"
-        )
-    color1 = scene_graph.get_attribute(objects1[0], 'color')
-    color2 = scene_graph.get_attribute(objects2[0], 'color')
+def equal_color(scene_graph: SceneGraph, color1: str, color2: str) -> bool:
     return color1 == color2
 
-def equal_shape(scene_graph: SceneGraph, objects1: List[int], objects2: List[int]) -> bool:
-    if len(objects1) != 1 or len(objects2) != 1:
-        raise ValueError(
-            f"equal_shape expects 1 object in each set, "
-            f"got {len(objects1)} and {len(objects2)}"
-        )
-    shape1 = scene_graph.get_attribute(objects1[0], 'shape')
-    shape2 = scene_graph.get_attribute(objects2[0], 'shape')
+def equal_shape(scene_graph: SceneGraph, shape1: str, shape2: str) -> bool:
     return shape1 == shape2
 
-def equal_size(scene_graph: SceneGraph, objects1: List[int], objects2: List[int]) -> bool:
-    if len(objects1) != 1 or len(objects2) != 1:
-        raise ValueError(
-            f"equal_size expects 1 object in each set, "
-            f"got {len(objects1)} and {len(objects2)}"
-        )
-    size1 = scene_graph.get_attribute(objects1[0], 'size')
-    size2 = scene_graph.get_attribute(objects2[0], 'size')
+def equal_size(scene_graph: SceneGraph, size1: str, size2: str) -> bool:
     return size1 == size2
 
-def equal_material(scene_graph: SceneGraph, objects1: List[int], objects2: List[int]) -> bool:
-    if len(objects1) != 1 or len(objects2) != 1:
-        raise ValueError(
-            f"equal_material expects 1 object in each set, "
-            f"got {len(objects1)} and {len(objects2)}"
-        )
-    material1 = scene_graph.get_attribute(objects1[0], 'material')
-    material2 = scene_graph.get_attribute(objects2[0], 'material')
+def equal_material(scene_graph: SceneGraph, material1: str, material2: str) -> bool:
     return material1 == material2
 
 
@@ -124,27 +96,34 @@ def greater_than(scene_graph: SceneGraph, int1: int, int2: int) -> bool:
 def same_color(scene_graph: SceneGraph, objects: List[int]) -> List[int]:
     if len(objects) != 1:
         raise ValueError(f"same_color expects 1 object, got {len(objects)}: {objects}")
-    ref_color = scene_graph.get_attribute(objects[0], 'color')
-    return [idx for idx in scene_graph.all_objects() if scene_graph.get_attribute(idx, 'color') == ref_color]
+    ref_obj = objects[0]
+    ref_color = scene_graph.get_attribute(ref_obj, 'color')
+    return [idx for idx in scene_graph.all_objects() 
+            if idx != ref_obj and scene_graph.get_attribute(idx, 'color') == ref_color]
 
 def same_shape(scene_graph: SceneGraph, objects: List[int]) -> List[int]:
     if len(objects) != 1:
         raise ValueError(f"same_shape expects 1 object, got {len(objects)}: {objects}")
-    ref_shape = scene_graph.get_attribute(objects[0], 'shape')
-    return [idx for idx in scene_graph.all_objects() if scene_graph.get_attribute(idx, 'shape') == ref_shape]
+    ref_obj = objects[0]
+    ref_shape = scene_graph.get_attribute(ref_obj, 'shape')
+    return [idx for idx in scene_graph.all_objects() 
+            if idx != ref_obj and scene_graph.get_attribute(idx, 'shape') == ref_shape]
 
 def same_size(scene_graph: SceneGraph, objects: List[int]) -> List[int]:
     if len(objects) != 1:
         raise ValueError(f"same_size expects 1 object, got {len(objects)}: {objects}")
-    ref_size = scene_graph.get_attribute(objects[0], 'size')
-    return [idx for idx in scene_graph.all_objects() if scene_graph.get_attribute(idx, 'size') == ref_size]
+    ref_obj = objects[0]
+    ref_size = scene_graph.get_attribute(ref_obj, 'size')
+    return [idx for idx in scene_graph.all_objects() 
+            if idx != ref_obj and scene_graph.get_attribute(idx, 'size') == ref_size]
 
 def same_material(sg: SceneGraph, objects: List[int]) -> List[int]:
     if len(objects) != 1:
         raise ValueError(f"same_material expects 1 object, got {len(objects)}: {objects}")
-    
-    ref_material = sg.get_attribute(objects[0], 'material')
-    return [idx for idx in sg.all_objects() if sg.get_attribute(idx, 'material') == ref_material]
+    ref_obj = objects[0]
+    ref_material = sg.get_attribute(ref_obj, 'material')
+    return [idx for idx in sg.all_objects() 
+            if idx != ref_obj and sg.get_attribute(idx, 'material') == ref_material]
 
 OPERATORS = {
     'scene': scene,
