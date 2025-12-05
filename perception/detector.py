@@ -6,11 +6,20 @@ from ultralytics import YOLO, FastSAM
 from ultralytics.utils import LOGGER 
 import logging
 
-LOGGER.setLevel(logging.ERROR)   
+LOGGER.setLevel(logging.ERROR)
+
+# Fiksna lokacija za modele - ne skidaju se ponovo ako već postoje
+MODELS_DIR = Path(__file__).parent.parent / "models"
+MODELS_DIR.mkdir(exist_ok=True)
+
+DEFAULT_YOLO_PATH = str(MODELS_DIR / "yolov8n.pt")
+DEFAULT_SAM_PATH = str(MODELS_DIR / "FastSAM-s.pt")   
 
 
 class Detector:
-    def __init__(self, model_path: str = "yolov8n.pt", device: str = "cpu"):
+    def __init__(self, model_path: str = None, device: str = "cpu"):
+        if model_path is None:
+            model_path = DEFAULT_YOLO_PATH
         self.model = YOLO(model_path)
         self.device = device
         self.model.to(device)
@@ -46,8 +55,8 @@ class HybridDetector(Detector):
 
     def __init__(
         self,
-        yolo_model_path: str = "yolov8n.pt",
-        sam_model_path: str = "FastSAM-s.pt",
+        yolo_model_path: str = None,
+        sam_model_path: str = None,
         device: str = "cpu",
         min_rel_area: float = 0.001,
         max_rel_area: float = 0.4,
@@ -55,6 +64,11 @@ class HybridDetector(Detector):
         iou_duplicate_thresh: float = 0.2,
         sam_imgsz: int = 640,
     ):
+        if yolo_model_path is None:
+            yolo_model_path = DEFAULT_YOLO_PATH
+        if sam_model_path is None:
+            sam_model_path = DEFAULT_SAM_PATH
+            
         super().__init__(model_path=yolo_model_path, device=device)
 
         self.sam_model = FastSAM(sam_model_path)

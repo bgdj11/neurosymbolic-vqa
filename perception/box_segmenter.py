@@ -7,15 +7,21 @@ import cv2
 import numpy as np
 from ultralytics import FastSAM
 
+# Fiksna lokacija za modele
+MODELS_DIR = Path(__file__).parent.parent / "models"
+DEFAULT_SAM_PATH = str(MODELS_DIR / "FastSAM-s.pt")
+
 class BoxSegmenter:
     def __init__(
         self,
-        sam_model_path: str = "FastSAM-s.pt",
+        sam_model_path: str = None,
         device: str = "cpu",
         imgsz: int = 512,
         conf: float = 0.4,
         iou: float = 0.9,
     ) -> None:
+        if sam_model_path is None:
+            sam_model_path = DEFAULT_SAM_PATH
         self.model = FastSAM(sam_model_path)
         self.device = device
         self.imgsz = imgsz

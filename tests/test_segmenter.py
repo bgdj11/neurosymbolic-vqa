@@ -88,13 +88,10 @@ def main():
         return
 
     detector = HybridDetector(
-        yolo_model_path="yolov8n.pt",
-        sam_model_path="FastSAM-s.pt",
         device="cpu",
     )
 
     segmenter = BoxSegmenter(
-        sam_model_path="FastSAM-s.pt",
         device="cpu",
     )
 

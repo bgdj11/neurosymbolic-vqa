@@ -287,12 +287,8 @@ if __name__ == "__main__":
 
     samples = load_clevr_samples(clevr_jsonl, limit=num_samples, seed=42)
 
-    yolo_detector = Detector(model_path="yolov8n.pt", device="cpu")
-    hybrid_detector = HybridDetector(
-        yolo_model_path="yolov8n.pt",
-        sam_model_path="FastSAM-s.pt",
-        device="cpu",
-    )
+    yolo_detector = Detector(device="cpu")
+    hybrid_detector = HybridDetector(device="cpu")
 
     yolo_results = run_single_detector(
         detector_name="yolo",
