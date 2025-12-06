@@ -8,7 +8,6 @@ import logging
 
 LOGGER.setLevel(logging.ERROR)
 
-# Fiksna lokacija za modele - ne skidaju se ponovo ako već postoje
 MODELS_DIR = Path(__file__).parent.parent / "models"
 MODELS_DIR.mkdir(exist_ok=True)
 

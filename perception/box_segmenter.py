@@ -7,7 +7,6 @@ import cv2
 import numpy as np
 from ultralytics import FastSAM
 
-# Fiksna lokacija za modele
 MODELS_DIR = Path(__file__).parent.parent / "models"
 DEFAULT_SAM_PATH = str(MODELS_DIR / "FastSAM-s.pt")
 
