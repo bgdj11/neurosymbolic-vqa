@@ -145,28 +145,69 @@ class AttributeExtractor:
             }
         
         return results
-    
+
+
     def extract_from_detections(
         self,
-        image: Union[Image.Image, np.ndarray],
+        image: Image.Image,
         detections: List[Dict],
-        attributes: List[str] = None
+        attributes: Optional[List[str]] = None,
+        use_heuristics: bool = True,
     ) -> List[Dict]:
 
-        if isinstance(image, np.ndarray):
-            image = Image.fromarray(image)
-        
+        pil_image = image.convert("RGB")
+
+        wanted = [a.lower() for a in (attributes or ["color", "shape", "size", "material"])]
+        clip_wanted = [a for a in wanted if a in ("color", "shape", "material")]
+        want_size = "size" in wanted
+
+        areas = None
+        median_area = 0.0
+
+        if want_size and use_heuristics:
+            def area_of(b):
+                x1, y1, x2, y2 = b
+                return max(0.0, float(x2) - float(x1)) * max(0.0, float(y2) - float(y1))
+
+            areas = []
+            for det in detections:
+                bbox = det.get("bbox")
+                areas.append(area_of(bbox) if bbox and len(bbox) == 4 else 0.0)
+
+            valid = [a for a in areas if a > 0]
+            median_area = float(np.median(valid)) if valid else 0.0
+
         results = []
-        for det in detections:
-            bbox = det.get("bbox")
-            if bbox is None:
-                results.append(det)
-                continue
-            
-            attrs = self.extract_attributes(image, bbox=tuple(bbox), attributes=attributes)
-            
+        for i, det in enumerate(detections):
             enriched = det.copy()
-            enriched["attributes"] = attrs
+            enriched["attributes"] = {}
+
+            bbox = det.get("bbox")
+            if not bbox or len(bbox) != 4:
+                results.append(enriched)
+                continue
+
+            bbox_t = tuple(bbox)
+
+            if clip_wanted:
+                clip_attrs = self.extract_attributes(pil_image, bbox=bbox_t, attributes=clip_wanted)
+                enriched["attributes"].update(clip_attrs)
+
+            if want_size:
+                if use_heuristics:
+                    a = areas[i] if areas is not None else 0.0
+                    m = median_area
+                    size_val = "large" if a > m else "small"
+                    denom = (m + 1.0)
+                    conf = min(0.95, 0.5 + abs(a - m) / denom * 0.5)
+                    enriched["attributes"]["size"] = {"value": size_val, "confidence": float(conf)}
+                else:
+                    enriched["attributes"]["size"] = self.extract_attributes(
+                        pil_image, bbox=bbox_t, attributes=["size"]
+                    )["size"]
+
             results.append(enriched)
-        
+
         return results
+
+
