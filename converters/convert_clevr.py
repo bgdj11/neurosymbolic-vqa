@@ -119,7 +119,7 @@ def convert_clevr_split(questions_path, scenes_path, images_dir, output_path, sp
 
 
 def main():
-    base_path = Path(__file__).resolve().parent
+    base_path = Path(__file__).resolve().parent.parent / "datasets"
     clevr_dir = base_path / "clevr"
     output_dir = base_path / "converted" / "clevr"
     splits = ["train", "val"]

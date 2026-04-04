@@ -73,7 +73,7 @@ def convert_humans(questions_path, scenes_path, output_path):
 
 
 def main():
-    base = Path(__file__).resolve().parent
+    base = Path(__file__).resolve().parent.parent / "datasets"
 
     scenes_path = base / 'clevr' / 'scenes' / 'CLEVR_val_scenes.json'
     if not scenes_path.exists():

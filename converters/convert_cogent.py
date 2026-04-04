@@ -64,7 +64,7 @@ def convert_cogent_split(questions_path, scenes_path, output_path, split_name):
 
 
 def main():
-    base = Path(__file__).resolve().parent
+    base = Path(__file__).resolve().parent.parent / "datasets"
     cogent_dir = base / 'cogent'
     out_dir = base / 'converted' / 'cogent'
 

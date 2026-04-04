@@ -113,7 +113,7 @@ def convert_superclevr(questions_path, scenes_path, images_dir, output_path):
 
 
 def main():
-    base = Path(__file__).resolve().parent
+    base = Path(__file__).resolve().parent.parent / "datasets"
     sc_dir = base / 'super_clevr'
 
     if not sc_dir.exists():
