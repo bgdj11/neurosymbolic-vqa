@@ -1,0 +1,48 @@
+perception:
+  detector:
+    confidence_threshold: 0.05
+    nms_iou_threshold: 0.45
+    model: "yolov8m"          # yolov8n | yolov8m
+    min_rel_area: 0.001
+    max_rel_area: 0.4
+    iou_match_thresh: 0.3
+    iou_duplicate_thresh: 0.2
+    sam_conf_threshold: 0.4
+    sam_conf_high: 0.7
+  segmenter:
+    model: "FastSAM-s"
+    imgsz: 1024
+  depth_estimator:
+    model: "MiDaS_small"      # MiDaS_small | DPT_Large
+  attribute_extractor:
+    clip_model: "ViT-B/32"
+    min_confidence: 0.0       # set > 0.0 to reject low-confidence predictions
+
+scene_graph:
+  relations:
+    horizontal_threshold: 0.05
+    horizontal_hysteresis: 0.02
+    depth_threshold: 0.10
+    depth_hysteresis: 0.03
+    position_overlap_iou: 0.10
+
+nl2dsl:
+  model: "t5-small"
+  max_input_length: 64
+  max_output_length: 256
+  beam_size: 5
+  num_return_sequences: 5
+
+eval:
+  batch_size: 32
+  max_samples: null           # null = run all samples
+  timeout_per_sample: 10.0   # seconds per sample before skip
+  save_traces: true
+
+paths:
+  clevr_val: "datasets/converted/clevr/clevr_val.jsonl"
+  clevr_train: "datasets/converted/clevr/clevr_train.jsonl"
+  gqa_val: "datasets/converted/gqa/gqa_val.jsonl"
+  model_checkpoint: "nl2dsl/checkpoints/best_model"
+  results_dir: "results"
+  plots_dir: "plots"
