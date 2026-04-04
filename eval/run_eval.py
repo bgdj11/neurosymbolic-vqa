@@ -10,9 +10,11 @@ from eval.metrics import EvalResult, categorize_question, compute_summary
 from nl2dsl.infer import NL2DSLModel
 
 DATASETS = {
-    'clevr_val':  'datasets/converted/clevr/clevr_val.jsonl',
-    'clevr_train': 'datasets/converted/clevr/clevr_train.jsonl',
-    'cogent_b':   'datasets/converted/cogent/cogent_valB.jsonl',
+    'clevr_val':      'datasets/converted/clevr/clevr_val.jsonl',
+    'clevr_train':    'datasets/converted/clevr/clevr_train.jsonl',
+    'cogent_b':       'datasets/converted/cogent/cogent_valB.jsonl',
+    'clevr_humans':   'datasets/converted/clevr_humans/clevr_humans_val.jsonl',
+    'superclevr':     'datasets/converted/superclevr/superclevr_val.jsonl',
 }
 
 
