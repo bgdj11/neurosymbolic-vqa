@@ -18,73 +18,119 @@ DATASETS = {
 }
 
 
+def _execute_sample(sample: dict, program, track: str) -> EvalResult:
+    cat = categorize_question(sample['question'])
+    if program is None:
+        return EvalResult(
+            question_id=sample['question_id'],
+            question=sample['question'],
+            expected_answer=sample['answer'],
+            predicted_answer=None,
+            correct=False,
+            category=cat,
+            track=track,
+            program_status='failed',
+            execution_error=None,
+        )
+    try:
+        sg = SceneGraph(sample['scene_graph'])
+        result = Executor(sg).execute(program)
+        predicted = str(result).lower()
+        return EvalResult(
+            question_id=sample['question_id'],
+            question=sample['question'],
+            expected_answer=sample['answer'],
+            predicted_answer=predicted,
+            correct=predicted == str(sample['answer']).lower(),
+            category=cat,
+            track=track,
+            program_status='valid',
+            execution_error=None,
+        )
+    except ExecutionError as e:
+        return EvalResult(
+            question_id=sample['question_id'],
+            question=sample['question'],
+            expected_answer=sample['answer'],
+            predicted_answer=None,
+            correct=False,
+            category=cat,
+            track=track,
+            program_status='valid',
+            execution_error=str(e),
+        )
+
+
 def run_gt_tok(
     jsonl_path: str,
     model: NL2DSLModel,
     limit: Optional[int],
     batch_size: int,
+    checkpoint_path: Optional[str] = None,
 ) -> list:
+    # Load checkpoint (already processed question_ids)
+    done_ids: dict = {}
+    if checkpoint_path and Path(checkpoint_path).exists():
+        with open(checkpoint_path, encoding='utf-8') as f:
+            for line in f:
+                r = json.loads(line)
+                done_ids[r['question_id']] = r
+        print(f'Resuming from checkpoint: {len(done_ids)} questions already done.')
+
     samples = []
     with open(jsonl_path, encoding='utf-8') as f:
         for i, line in enumerate(f):
             if limit and i >= limit:
                 break
-            samples.append(json.loads(line))
+            s = json.loads(line)
+            if s['question_id'] not in done_ids:
+                samples.append(s)
 
-    questions = [s['question'] for s in samples]
-    print(f'Translating {len(questions)} questions (batch_size={batch_size})...')
+    print(f'Translating {len(samples)} questions (batch_size={batch_size})...')
     t0 = time.time()
-    programs = model.predict_batch(questions, batch_size=batch_size)
+
+    try:
+        from tqdm import tqdm
+        _tqdm = tqdm
+    except ImportError:
+        _tqdm = None
+
+    ckpt_file = open(checkpoint_path, 'a', encoding='utf-8') if checkpoint_path else None
+    results_new = []
+    total = len(done_ids) + len(samples)
+
+    batches = range(0, len(samples), batch_size)
+    if _tqdm:
+        bar = _tqdm(batches, total=len(batches), unit='batch',
+                    desc='GT eval', initial=len(done_ids) // batch_size)
+    else:
+        bar = batches
+
+    for start in bar:
+        batch = samples[start:start + batch_size]
+        programs = model.predict_batch([s['question'] for s in batch], batch_size=batch_size)
+        for sample, program in zip(batch, programs):
+            r = _execute_sample(sample, program, 'gt')
+            results_new.append(r)
+            if ckpt_file:
+                ckpt_file.write(json.dumps(r.__dict__) + '\n')
+                ckpt_file.flush()
+        if _tqdm:
+            done_so_far = len(done_ids) + len(results_new)
+            correct = sum(1 for r in results_new if r.correct)
+            bar.set_postfix(done=done_so_far, acc=f'{correct/max(len(results_new),1):.3f}')
+        else:
+            done_so_far = len(done_ids) + len(results_new)
+            print(f'  {done_so_far}/{total} — {time.time()-t0:.0f}s elapsed')
+
+    if ckpt_file:
+        ckpt_file.close()
+
     print(f'NL2DSL done in {time.time()-t0:.1f}s')
 
-    results = []
-    for sample, program in zip(samples, programs):
-        cat = categorize_question(sample['question'])
-
-        if program is None:
-            results.append(EvalResult(
-                question_id=sample['question_id'],
-                question=sample['question'],
-                expected_answer=sample['answer'],
-                predicted_answer=None,
-                correct=False,
-                category=cat,
-                track='gt',
-                program_status='failed',
-                execution_error=None,
-            ))
-            continue
-
-        try:
-            sg = SceneGraph(sample['scene_graph'])
-            result = Executor(sg).execute(program)
-            predicted = str(result).lower()
-            correct = predicted == str(sample['answer']).lower()
-            results.append(EvalResult(
-                question_id=sample['question_id'],
-                question=sample['question'],
-                expected_answer=sample['answer'],
-                predicted_answer=predicted,
-                correct=correct,
-                category=cat,
-                track='gt',
-                program_status='valid',
-                execution_error=None,
-            ))
-        except ExecutionError as e:
-            results.append(EvalResult(
-                question_id=sample['question_id'],
-                question=sample['question'],
-                expected_answer=sample['answer'],
-                predicted_answer=None,
-                correct=False,
-                category=cat,
-                track='gt',
-                program_status='valid',
-                execution_error=str(e),
-            ))
-
-    return results
+    # Merge checkpoint results with new results
+    all_results = [EvalResult(**v) for v in done_ids.values()] + results_new
+    return all_results
 
 
 def run_detected_tok(
@@ -230,7 +276,8 @@ def main():
         tag += f'_n{args.limit}'
 
     if args.track == 'gt':
-        results = run_gt_tok(jsonl_path, model, args.limit, args.batch)
+        ckpt = Path(args.output) / f'{tag}_checkpoint.jsonl'
+        results = run_gt_tok(jsonl_path, model, args.limit, args.batch, checkpoint_path=str(ckpt))
     else:
         results = run_detected_tok(jsonl_path, model, args.limit, args.batch)
 
