@@ -1,0 +1,17 @@
+{
+  "track": "gt",
+  "dataset": "clevr_humans",
+  "total": 7202,
+  "correct": 2982,
+  "accuracy": 0.4140516523188003,
+  "accuracy_by_category": {
+    "other": 0.21504237288135594,
+    "query": 0.3137407551576489,
+    "count": 0.6164058795637744,
+    "exist": 0.6089385474860335,
+    "compare": 0.18686131386861313
+  },
+  "valid_program_rate": 0.9051652318800333,
+  "execution_error_rate": 0.25479033601777284,
+  "failed_program_count": 683
+}

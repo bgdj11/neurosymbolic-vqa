@@ -1,0 +1,17 @@
+{
+  "track": "gt",
+  "dataset": "clevr_val",
+  "total": 1000,
+  "correct": 999,
+  "accuracy": 0.999,
+  "accuracy_by_category": {
+    "exist": 1.0,
+    "query": 1.0,
+    "other": 0.9950248756218906,
+    "compare": 1.0,
+    "count": 1.0
+  },
+  "valid_program_rate": 1.0,
+  "execution_error_rate": 0.0,
+  "failed_program_count": 0
+}

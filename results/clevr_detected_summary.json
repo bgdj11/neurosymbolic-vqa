@@ -1,0 +1,16 @@
+{
+  "track": "detected",
+  "dataset": "clevr",
+  "total": 10000,
+  "correct": 2235,
+  "accuracy": 0.2235,
+  "accuracy_by_category": {
+    "query": 0.2303,
+    "compare": 0.1219,
+    "count": 0.3048,
+    "other": 0.1984,
+    "exist": 0.3649
+  },
+  "valid_program_rate": 0.9998,
+  "execution_error_rate": 0.6564
+}

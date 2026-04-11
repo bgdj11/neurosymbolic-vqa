@@ -1,0 +1,17 @@
+{
+  "track": "gt",
+  "dataset": "cogent_b",
+  "total": 5000,
+  "correct": 4984,
+  "accuracy": 0.9968,
+  "accuracy_by_category": {
+    "other": 0.9914122137404581,
+    "count": 0.9963031423290203,
+    "compare": 0.997716894977169,
+    "exist": 1.0,
+    "query": 0.998468606431853
+  },
+  "valid_program_rate": 0.9998,
+  "execution_error_rate": 0.0008,
+  "failed_program_count": 1
+}
