@@ -1,9 +1,3 @@
-"""
-Generate all figures for the thesis.
-Run from project root: python -m report.generate_figures
-Output: report/figures/
-"""
-
 import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -22,9 +16,9 @@ matplotlib.rcParams.update({
     'axes.spines.right': False,
 })
 
-RESULTS    = Path('results')
+RESULTS = Path('results')
 SCENES_DIR = Path('results/scene_graphs')
-OUT        = Path('report/figures')
+OUT = Path('report/figures')
 OUT.mkdir(parents=True, exist_ok=True)
 
 
@@ -44,7 +38,7 @@ def savefig(name):
     print(f'  {name} saved.')
 
 
-# ── Figure 1: GT tok accuracy across datasets ────────────────────
+# ── Figure 1: GT tok accuracy across datasets 
 def fig_gt_accuracy():
     datasets = {
         'CLEVR': load_summary(RESULTS / 'clevr_val_gt_n1000_summary.json'),
@@ -54,7 +48,7 @@ def fig_gt_accuracy():
     }
 
     labels = list(datasets.keys())
-    accs   = [d['accuracy'] * 100 for d in datasets.values()]
+    accs = [d['accuracy'] * 100 for d in datasets.values()]
     colors = ['#4C72B0', '#4C72B0', '#DD8452', '#55A868']
 
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -73,15 +67,15 @@ def fig_gt_accuracy():
     savefig('fig1_gt_accuracy')
 
 
-# ── Figure 2: GT vs Detected tok on CLEVR ────────────────────────
+# ── Figure 2: GT vs Detected tok on CLEVR 
 def fig_gt_vs_detected():
-    gt  = load_summary(RESULTS / 'clevr_val_gt_n1000_summary.json')
+    gt = load_summary(RESULTS / 'clevr_val_gt_n1000_summary.json')
     det = load_summary(RESULTS / 'clevr_detected_summary.json')
 
-    categories     = ['count', 'exist', 'query', 'compare', 'other']
-    labels_pretty  = ['Count', 'Exist', 'Query', 'Compare', 'Other']
+    categories = ['count', 'exist', 'query', 'compare', 'other']
+    labels_pretty = ['Count', 'Exist', 'Query', 'Compare', 'Other']
 
-    gt_vals  = [gt['accuracy_by_category'].get(c, 0) * 100  for c in categories]
+    gt_vals = [gt['accuracy_by_category'].get(c, 0) * 100  for c in categories]
     det_vals = [det['accuracy_by_category'].get(c, 0) * 100 for c in categories]
 
     x = np.arange(len(categories))
@@ -107,14 +101,14 @@ def fig_gt_vs_detected():
     savefig('fig2_gt_vs_detected')
 
 
-# ── Figure 3: Error breakdown for detected tok ────────────────────
+# ── Figure 3: Error breakdown for detected tok 
 def fig_error_breakdown():
     det = load_summary(RESULTS / 'clevr_detected_summary.json')
 
-    total     = det['total']
-    correct   = det['correct']
-    exec_err  = int(det['execution_error_rate'] * total)
-    nl_fail   = total - int(det['valid_program_rate'] * total)
+    total = det['total']
+    correct = det['correct']
+    exec_err = int(det['execution_error_rate'] * total)
+    nl_fail = total - int(det['valid_program_rate'] * total)
     wrong_exec = max(total - correct - exec_err - nl_fail, 0)
 
     sizes  = [correct, exec_err, nl_fail, wrong_exec]
@@ -143,7 +137,7 @@ def fig_error_breakdown():
     savefig('fig3_error_breakdown')
 
 
-# ── Figure 4: Category accuracy heatmap ──────────────────────────
+# ── Figure 4: Category accuracy heatmap
 def fig_category_heatmap():
     summaries = {
         'CLEVR (GT)':         load_summary(RESULTS / 'clevr_val_gt_n1000_summary.json'),
@@ -153,8 +147,8 @@ def fig_category_heatmap():
         'Super-CLEVR (GT)':   load_summary(RESULTS / 'superclevr_gt_n5000_summary.json'),
     }
 
-    categories    = ['count', 'exist', 'query', 'compare', 'other']
-    cat_labels    = ['Count', 'Exist', 'Query', 'Compare', 'Other']
+    categories = ['count', 'exist', 'query', 'compare', 'other']
+    cat_labels = ['Count', 'Exist', 'Query', 'Compare', 'Other']
     dataset_labels = list(summaries.keys())
 
     data = np.array([
@@ -187,7 +181,7 @@ def fig_category_heatmap():
     savefig('fig4_category_heatmap')
 
 
-# ── Figure 5: Valid program rate and execution error rate ─────────
+# ── Figure 5: Valid program rate and execution error rate
 def fig_pipeline_rates():
     summaries = {
         'CLEVR\n(GT)':         load_summary(RESULTS / 'clevr_val_gt_n1000_summary.json'),
@@ -197,7 +191,7 @@ def fig_pipeline_rates():
         'Super-CLEVR\n(GT)':   load_summary(RESULTS / 'superclevr_gt_n5000_summary.json'),
     }
 
-    labels   = list(summaries.keys())
+    labels = list(summaries.keys())
     valid_pr = [s['valid_program_rate'] * 100 for s in summaries.values()]
     exec_err = [s['execution_error_rate'] * 100 for s in summaries.values()]
 
@@ -219,7 +213,7 @@ def fig_pipeline_rates():
     savefig('fig5_pipeline_rates')
 
 
-# ── Figure 6: Color confusion matrix (GT vs Detected) ────────────
+# ── Figure 6: Color confusion matrix (GT vs Detected)
 def fig_color_confusion():
     import json as _json
     gt_path = Path('datasets/clevr/scenes/CLEVR_val_scenes.json')
@@ -244,12 +238,11 @@ def fig_color_confusion():
         for det in det_objs:
             dcx, dcy = det['pixel_coords'][0], det['pixel_coords'][1]
             best = min(gt_objs, key=lambda g: (g['pixel_coords'][0]-dcx)**2 + (g['pixel_coords'][1]-dcy)**2)
-            gt_c  = best['color']
+            gt_c = best['color']
             det_c = det.get('color')
             if gt_c in COLORS and det_c in COLORS:
                 conf[COLORS.index(gt_c), COLORS.index(det_c)] += 1
 
-    # Normalize rows
     row_sums = conf.sum(axis=1, keepdims=True)
     conf_norm = np.where(row_sums > 0, conf / row_sums, 0)
 
@@ -276,7 +269,7 @@ def fig_color_confusion():
     savefig('fig6_color_confusion')
 
 
-# ── Figure 7: Avg detected vs GT objects per scene ───────────────
+# ── Figure 7: Avg detected vs GT objects per scene
 def fig_object_count_dist():
     gt_path = Path('datasets/clevr/scenes/CLEVR_val_scenes.json')
     if not gt_path.exists() or not SCENES_DIR.exists():
@@ -298,9 +291,9 @@ def fig_object_count_dist():
             det_n = len(json.load(f)['objects'])
         by_gt.setdefault(gt_n, []).append(det_n)
 
-    gt_counts  = sorted(by_gt.keys())
-    avg_det    = [np.mean(by_gt[n]) for n in gt_counts]
-    std_det    = [np.std(by_gt[n])  for n in gt_counts]
+    gt_counts = sorted(by_gt.keys())
+    avg_det = [np.mean(by_gt[n]) for n in gt_counts]
+    std_det = [np.std(by_gt[n])  for n in gt_counts]
 
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(gt_counts, gt_counts,  'o--', color='#4C72B0', label='GT (perfect)', linewidth=1.5)
@@ -316,8 +309,7 @@ def fig_object_count_dist():
     plt.tight_layout()
     savefig('fig7_object_count_dist')
 
-
-# ── Figure 8: Accuracy vs number of objects in scene ─────────────
+# ── Figure 8: Accuracy vs number of objects in scene
 def fig_accuracy_vs_objects():
     gt_path = Path('datasets/clevr/scenes/CLEVR_val_scenes.json')
     pq_path = RESULTS / 'clevr_detected_per_question.jsonl'
@@ -340,8 +332,8 @@ def fig_accuracy_vs_objects():
         by_count.setdefault(n, []).append(r['correct'])
 
     counts = sorted(by_count.keys())
-    accs   = [np.mean(by_count[c]) * 100 for c in counts]
-    ns     = [len(by_count[c]) for c in counts]
+    accs = [np.mean(by_count[c]) * 100 for c in counts]
+    ns = [len(by_count[c]) for c in counts]
 
     fig, ax1 = plt.subplots(figsize=(8, 5))
 
@@ -371,7 +363,7 @@ def fig_accuracy_vs_objects():
     savefig('fig8_accuracy_vs_objects')
 
 
-# ── Figure 9: Attribute accuracy summary (color/shape/material) ───
+# ── Figure 9: Attribute accuracy summary (color/shape/material)
 def fig_material_confusion():
     gt_path = Path('datasets/clevr/scenes/CLEVR_val_scenes.json')
     if not gt_path.exists() or not SCENES_DIR.exists():
@@ -394,13 +386,13 @@ def fig_material_confusion():
         for det in det_objs:
             dcx, dcy = det['pixel_coords'][0], det['pixel_coords'][1]
             best = min(gt_objs, key=lambda g: (g['pixel_coords'][0]-dcx)**2 + (g['pixel_coords'][1]-dcy)**2)
-            if det.get('color')    == best['color']:    color_c += 1
-            if det.get('shape')    == best['shape']:    shape_c += 1
+            if det.get('color') == best['color']: color_c += 1
+            if det.get('shape') == best['shape']: shape_c += 1
             if det.get('material') == best['material']: mat_c   += 1
             total += 1
 
     attrs  = ['Color', 'Shape', 'Material']
-    accs   = [color_c/total*100, shape_c/total*100, mat_c/total*100]
+    accs = [color_c/total*100, shape_c/total*100, mat_c/total*100]
     colors = ['#4C72B0', '#55A868', '#C44E52']
 
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -418,7 +410,7 @@ def fig_material_confusion():
     savefig('fig9_attribute_accuracy')
 
 
-# ── Figure 10: Execution error breakdown ─────────────────────────
+# ── Figure 10: Execution error breakdown
 def fig_execution_errors():
     pq_path = RESULTS / 'clevr_detected_per_question.jsonl'
     if not pq_path.exists():
@@ -426,11 +418,11 @@ def fig_execution_errors():
         return
 
     results = load_per_question(pq_path)
-    errors  = [r['execution_error'] for r in results
+    errors = [r['execution_error'] for r in results
                if r.get('execution_error') not in (None, 'image_not_found')]
 
-    got0  = sum(1 for e in errors if 'got 0' in e)
-    gotN  = len(errors) - got0
+    got0 = sum(1 for e in errors if 'got 0' in e)
+    gotN = len(errors) - got0
 
     labels = ['unique(): no object found\n(filter returned 0 matches)',
               'unique(): multiple objects\n(filter returned >1 match)']
