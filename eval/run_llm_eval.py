@@ -1,7 +1,7 @@
 """
-    python eval/run_llm_eval.py --dataset clevr_val --limit 1000
-    python eval/run_llm_eval.py --dataset clevr_humans --limit 1000
-    python eval/run_llm_eval.py --dataset clevr_val --llm-model llama3.2:1b --limit 1000
+    python -m eval.run_llm_eval --dataset clevr_val --limit 1000
+    python -m eval.run_llm_eval --dataset clevr_humans --limit 1000
+    python -m eval.run_llm_eval --dataset clevr_val --llm-model llama3.2:1b --limit 1000
 """
 import argparse
 import json
@@ -141,6 +141,7 @@ def main():
     model = LLMTranslator(model=args.llm_model)
 
     ckpt = Path(args.output) / f'{tag}_checkpoint.jsonl'
+    ckpt.parent.mkdir(parents=True, exist_ok=True)
     results = run_llm_gt_tok(jsonl_path, model, args.limit, str(ckpt))
 
     summary = compute_summary(results, track='gt', dataset=args.dataset)

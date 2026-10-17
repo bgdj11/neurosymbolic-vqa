@@ -60,7 +60,7 @@ class Executor:
 
         inputs = []
         for input_idx in step.get('inputs', []):
-            if input_idx >= len(self.results):
+            if not isinstance(input_idx, int) or isinstance(input_idx, bool) or not 0 <= input_idx < len(self.results):
                 raise ExecutionError(
                     f"Step {step_idx}: Invalid input reference {input_idx} "
                     f"(only {len(self.results)} previous results available)"

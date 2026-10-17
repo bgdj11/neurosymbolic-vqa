@@ -1,0 +1,95 @@
+{
+  "provenance": {
+    "kind": "manually_transcribed_thesis_results",
+    "thesis": "DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf",
+    "thesis_sha256": "8f2f8e2cd4fc981f493336d97da2627918683168ba5dce88d790eb8640d0b46a",
+    "presentation": "docs/presentation/DIPLOMSKI-PPT.pptx",
+    "note": "Final results reported in the July thesis and defense presentation. Original Kaggle output files were not retained. These values are not a fresh evaluation of this checkout.",
+    "accuracy_tables": [
+      "6.2",
+      "6.8"
+    ],
+    "perception_tables": [
+      "6.4",
+      "6.5",
+      "6.6",
+      "6.7"
+    ],
+    "presentation_slides": [
+      13,
+      14,
+      15
+    ],
+    "english_presentation": "docs/presentation/Bachelor_Thesis_Presentation_EN.pptx"
+  },
+  "accuracy": [
+    {
+      "dataset": "CLEVR val",
+      "gt_questions": 1000,
+      "gt": 99.9,
+      "e2e": 79.0,
+      "valid_programs": 100.0,
+      "execution_errors": 0.0
+    },
+    {
+      "dataset": "CoGenT valB",
+      "gt_questions": 5000,
+      "gt": 99.7,
+      "e2e": 79.0,
+      "valid_programs": 100.0,
+      "execution_errors": 0.1
+    },
+    {
+      "dataset": "CLEVR-Humans (before RL)",
+      "gt_questions": 7202,
+      "gt": 41.4,
+      "e2e": 32.7,
+      "valid_programs": 90.5,
+      "execution_errors": 25.5
+    },
+    {
+      "dataset": "CLEVR-Humans (after RL)",
+      "gt_questions": 7202,
+      "gt": 57.1,
+      "e2e": 45.6,
+      "valid_programs": 92.6,
+      "execution_errors": 0.6
+    }
+  ],
+  "perception": {
+    "images": 1000,
+    "matching": "Nearest-center matching; thesis threshold < 50 pixels. Current diagnostic scripts also contain a 60-pixel variant.",
+    "detection_percent": {
+      "Recall": 97.5,
+      "Precision": 88.7,
+      "F1": 92.9,
+      "Exact object count": 53.0
+    },
+    "false_negatives_per_image": 0.16,
+    "false_positives_per_image": 0.8,
+    "attributes_percent": {
+      "Color": 87.8,
+      "Shape": 95.5,
+      "Material": 94.4,
+      "Size": 92.8
+    },
+    "relations_percent": {
+      "Left": 66.5,
+      "Right": 66.7,
+      "Front": 68.6,
+      "Behind": 44.3,
+      "Overall": 61.5
+    },
+    "colors_percent": {
+      "Green": 97.0,
+      "Cyan": 92.0,
+      "Blue": 91.0,
+      "Red": 90.0,
+      "Purple": 89.0,
+      "Yellow": 87.0,
+      "Gray": 86.0,
+      "Brown": 71.0
+    }
+  },
+  "units": "All accuracy, validity and error-rate values are percentages."
+}

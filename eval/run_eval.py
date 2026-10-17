@@ -2,12 +2,13 @@ import argparse
 import json
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from dsl.executor import Executor, ExecutionError
 from dsl.scene_graph import SceneGraph
 from eval.metrics import EvalResult, categorize_question, compute_summary
-from nl2dsl.infer import NL2DSLModel
+if TYPE_CHECKING:
+    from nl2dsl.infer import NL2DSLModel
 
 DATASETS = {
     'clevr_val':      'datasets/converted/clevr/clevr_val.jsonl',
@@ -63,7 +64,7 @@ def _execute_sample(sample: dict, program, track: str) -> EvalResult:
 
 def run_gt_tok(
     jsonl_path: str,
-    model: NL2DSLModel,
+    model: 'NL2DSLModel',
     limit: Optional[int],
     batch_size: int,
     checkpoint_path: Optional[str] = None,
@@ -135,21 +136,34 @@ def run_gt_tok(
 
 def run_detected_tok(
     jsonl_path: str,
-    model: NL2DSLModel,
+    model: 'NL2DSLModel',
     limit: Optional[int],
     batch_size: int,
+    checkpoint_path: Optional[str] = None,
 ) -> list:
     from scene_graph.builder import SceneGraphBuilder
     builder = SceneGraphBuilder()
 
-    samples = []
+    # Load checkpoint
+    done_ids: dict = {}
+    if checkpoint_path and Path(checkpoint_path).exists():
+        with open(checkpoint_path, encoding='utf-8') as f:
+            for line in f:
+                r = json.loads(line)
+                done_ids[r['question_id']] = r
+        print(f'Resuming from checkpoint: {len(done_ids)} questions already done.')
+
+    all_samples = []
     with open(jsonl_path, encoding='utf-8') as f:
         for i, line in enumerate(f):
             if limit and i >= limit:
                 break
-            samples.append(json.loads(line))
+            all_samples.append(json.loads(line))
 
-    # Build detected scene graphs (cache by image path)
+    samples = [s for s in all_samples if s['question_id'] not in done_ids]
+    print(f'Total: {len(all_samples)} | Done: {len(done_ids)} | Remaining: {len(samples)}')
+
+    # Build detected scene graphs (cache by image path, only for remaining)
     image_cache = {}
     print(f'Building detected scene graphs for {len(samples)} samples...')
     for i, sample in enumerate(samples):
@@ -171,13 +185,14 @@ def run_detected_tok(
     print('Translating questions...')
     programs = model.predict_batch(questions, batch_size=batch_size)
 
-    results = []
+    ckpt_file = open(checkpoint_path, 'a', encoding='utf-8') if checkpoint_path else None
+    results_new = []
     for sample, program in zip(samples, programs):
         cat = categorize_question(sample['question'])
         detected_sg = image_cache.get(sample['image_path'])
 
         if program is None:
-            results.append(EvalResult(
+            r = EvalResult(
                 question_id=sample['question_id'],
                 question=sample['question'],
                 expected_answer=sample['answer'],
@@ -187,11 +202,9 @@ def run_detected_tok(
                 track='detected',
                 program_status='failed',
                 execution_error=None,
-            ))
-            continue
-
-        if detected_sg is None:
-            results.append(EvalResult(
+            )
+        elif detected_sg is None:
+            r = EvalResult(
                 question_id=sample['question_id'],
                 question=sample['question'],
                 expected_answer=sample['answer'],
@@ -201,39 +214,47 @@ def run_detected_tok(
                 track='detected',
                 program_status='valid',
                 execution_error='image_not_found',
-            ))
-            continue
+            )
+        else:
+            try:
+                sg = SceneGraph(detected_sg)
+                result = Executor(sg).execute(program)
+                predicted = str(result).lower()
+                correct = predicted == str(sample['answer']).lower()
+                r = EvalResult(
+                    question_id=sample['question_id'],
+                    question=sample['question'],
+                    expected_answer=sample['answer'],
+                    predicted_answer=predicted,
+                    correct=correct,
+                    category=cat,
+                    track='detected',
+                    program_status='valid',
+                    execution_error=None,
+                )
+            except ExecutionError as e:
+                r = EvalResult(
+                    question_id=sample['question_id'],
+                    question=sample['question'],
+                    expected_answer=sample['answer'],
+                    predicted_answer=None,
+                    correct=False,
+                    category=cat,
+                    track='detected',
+                    program_status='valid',
+                    execution_error=str(e),
+                )
 
-        try:
-            sg = SceneGraph(detected_sg)
-            result = Executor(sg).execute(program)
-            predicted = str(result).lower()
-            correct = predicted == str(sample['answer']).lower()
-            results.append(EvalResult(
-                question_id=sample['question_id'],
-                question=sample['question'],
-                expected_answer=sample['answer'],
-                predicted_answer=predicted,
-                correct=correct,
-                category=cat,
-                track='detected',
-                program_status='valid',
-                execution_error=None,
-            ))
-        except ExecutionError as e:
-            results.append(EvalResult(
-                question_id=sample['question_id'],
-                question=sample['question'],
-                expected_answer=sample['answer'],
-                predicted_answer=None,
-                correct=False,
-                category=cat,
-                track='detected',
-                program_status='valid',
-                execution_error=str(e),
-            ))
+        results_new.append(r)
+        if ckpt_file:
+            ckpt_file.write(json.dumps(r.__dict__) + '\n')
+            ckpt_file.flush()
 
-    return results
+    if ckpt_file:
+        ckpt_file.close()
+
+    all_results = [EvalResult(**v) for v in done_ids.values()] + results_new
+    return all_results
 
 
 def save_results(results, summary, output_dir: str, tag: str):
@@ -263,23 +284,28 @@ def main():
     parser.add_argument('--output',  default='results')
     args = parser.parse_args()
 
+    if args.batch <= 0 or (args.limit is not None and args.limit <= 0):
+        parser.error('--batch and --limit must be positive')
+
     jsonl_path = DATASETS[args.dataset]
     if not Path(jsonl_path).exists():
-        print(f'Dataset not found: {jsonl_path}')
-        return
+        parser.error(f'Dataset not found: {jsonl_path}')
 
+    from nl2dsl.infer import NL2DSLModel
     print(f'Loading model from {args.model}...')
     model = NL2DSLModel(args.model)
+    batch_size = args.batch
 
     tag = f'{args.dataset}_{args.track}'
     if args.limit:
         tag += f'_n{args.limit}'
 
+    ckpt = Path(args.output) / f'{tag}_checkpoint.jsonl'
+    ckpt.parent.mkdir(parents=True, exist_ok=True)
     if args.track == 'gt':
-        ckpt = Path(args.output) / f'{tag}_checkpoint.jsonl'
         results = run_gt_tok(jsonl_path, model, args.limit, args.batch, checkpoint_path=str(ckpt))
     else:
-        results = run_detected_tok(jsonl_path, model, args.limit, args.batch)
+        results = run_detected_tok(jsonl_path, model, args.limit, args.batch, checkpoint_path=str(ckpt))
 
     summary = compute_summary(results, track=args.track, dataset=args.dataset)
     summary.print()

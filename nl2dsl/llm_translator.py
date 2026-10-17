@@ -34,6 +34,8 @@ FEW_SHOT_EXAMPLES = [
      "scene | filter_size small | filter_shape sphere | unique | relate behind | unique | query_color"),
     ("Are there any cylinders to the right of the blue object?",
      "scene | filter_color blue | unique | relate right | filter_shape cylinder | exist"),
+    ("There is a small gray block; are there any spheres to the left of it?",
+     "scene | filter_size small | filter_color gray | filter_shape cube | unique | relate left | filter_shape sphere | exist"),
     # compare
     ("Are there more cubes than spheres?",
      "scene | filter_shape cube:0 | count:1 | scene | filter_shape sphere:0 | count:3 | greater_than:2,4"),
@@ -41,11 +43,17 @@ FEW_SHOT_EXAMPLES = [
      "scene | filter_color red:0 | count:1 | scene | filter_color blue:0 | count:3 | greater_than:2,4"),
     ("Are there the same number of large things as red things?",
      "scene | filter_size large:0 | count:1 | scene | filter_color red:0 | count:3 | equal_integer:2,4"),
-    # same-attribute relate
-    ("What is the color of the object that is the same size as the metal cube?",
-     "scene | filter_material metal | filter_shape cube | unique | query_size:3 | scene | filter_size:4 | unique | query_color"),
-    ("How many other things are the same shape as the large red object?",
-     "scene | filter_size large | filter_color red | unique | query_shape:3 | scene | filter_shape:4 | count"),
+    # same-attribute (use same_shape / same_size / same_color / same_material)
+    ("Are there any other things that are the same shape as the big metallic object?",
+     "scene | filter_size large | filter_material metal | unique | same_shape | exist"),
+    ("How many other objects are the same size as the purple shiny object?",
+     "scene | filter_color purple | filter_material metal | unique | same_size | count"),
+    ("Is there anything else that has the same color as the large shiny cube?",
+     "scene | filter_size large | filter_material metal | filter_shape cube | unique | same_color | exist"),
+    ("How many other things are the same material as the big gray cylinder?",
+     "scene | filter_size large | filter_color gray | filter_shape cylinder | unique | same_material | count"),
+    ("Is there a big brown object of the same shape as the green thing?",
+     "scene | filter_color green | unique | same_shape | filter_color brown | filter_size large | exist"),
     # boolean
     ("Is the cube the same color as the sphere?",
      "scene | filter_shape cube | unique | query_color:2 | scene | filter_shape sphere | unique | query_color:5 | equal_color:3,6"),
@@ -58,25 +66,40 @@ FEW_SHOT_EXAMPLES = [
 
 SYSTEM_PROMPT = """You are a semantic parser. Convert natural language questions about 3D scenes into a DSL (Domain Specific Language).
 
+CRITICAL OUTPUT RULES:
+- Output EXACTLY one line: the DSL string only
+- NO explanations, NO comments, NO extra text before or after
+- If unsure, output your best guess DSL string anyway
+
 DSL rules:
 - Programs are sequences of operations separated by " | "
+- Steps are numbered 0, 1, 2, ... from left to right
 - scene: returns all objects (always first)
-- filter_color <color>: keep objects with color. Colors: red, blue, green, yellow, purple, gray, brown, cyan
-- filter_shape <shape>: keep objects with shape. Shapes: cube, sphere, cylinder
-- filter_size <size>: keep objects with size. Sizes: large, small
-- filter_material <mat>: keep objects with material. Materials: metal, rubber
+- filter_color <color>: keep objects with color. Colors: red, blue, green, yellow, purple, gray, brown, cyan. ALWAYS write "filter_color red", never just "red"
+- filter_shape <shape>: keep objects with shape. Shapes: cube, sphere, cylinder. "block" = cube. ALWAYS write "filter_shape cube", never just "cube"
+- filter_size <size>: keep objects with size. Sizes: large, small. "big" = large. ALWAYS write "filter_size large", never just "large"
+- filter_material <mat>: keep objects with material. Materials: metal, rubber. "shiny" = metal, "matte" = rubber. ALWAYS write "filter_material metal", never just "metal"
 - unique: select the single object (use when exactly one object matches)
 - count: count objects → integer
 - exist: do any objects match → yes/no
-- query_color / query_shape / query_size / query_material: get attribute of unique object
+- query_color / query_shape / query_size / query_material: get attribute of unique object (NO arguments)
+- same_shape / same_size / same_color / same_material: return all OTHER objects with the same attribute as current unique object (NO arguments). Use for "same X as Y" questions.
 - relate <dir>: objects spatially related to current unique object. Directions: left, right, front, behind
-- greater_than, less_than, equal_integer: compare two integers. Use :i,j to reference step indices
+- greater_than, less_than, equal_integer: compare two integers
 - equal_color, equal_shape, equal_size, equal_material: compare two attribute values
-- union:i,j / intersect:i,j: set operations on two object sets
-- Use :i to reference a non-previous step as input
-- Use :i,j for binary operations with two inputs
+- union / intersect: set operations on two object sets
 
-Output ONLY the DSL string, nothing else."""
+Step reference syntax (:i and :i,j):
+- Use :i ONLY to refer to the output of step number i (0-indexed)
+- Use op:i when the input is NOT the immediately previous step
+- Use op:i,j for binary operations taking two step outputs as inputs
+- NEVER use :value (like :metal or :red) — that is wrong. :i means step index only
+- Example: query_shape:3 means "query_shape using output of step 3", NOT "query shape=3"
+- Example: filter_shape:4 means "filter using the shape value produced at step 4"
+
+"Same X as Y" pattern (IMPORTANT):
+- Find Y → unique → same_X → ...
+- Example "same shape as the red cube": scene | filter_color red | filter_shape cube | unique | same_shape | ..."""
 
 
 def build_prompt(question: str) -> str:

@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 from PIL import Image
 from ultralytics import YOLO, FastSAM
-from ultralytics.utils import LOGGER 
+from ultralytics.utils import LOGGER
 import logging
 
 LOGGER.setLevel(logging.ERROR)
@@ -11,8 +11,8 @@ LOGGER.setLevel(logging.ERROR)
 MODELS_DIR = Path(__file__).parent.parent / "models"
 MODELS_DIR.mkdir(exist_ok=True)
 
-DEFAULT_YOLO_PATH = str(MODELS_DIR / "yolov8n.pt")
-DEFAULT_SAM_PATH = str(MODELS_DIR / "FastSAM-s.pt")   
+DEFAULT_YOLO_PATH = str(MODELS_DIR / "yolov8m.pt")
+DEFAULT_SAM_PATH = str(MODELS_DIR / "FastSAM-x.pt")
 
 
 class Detector:
@@ -60,7 +60,7 @@ class HybridDetector(Detector):
         min_rel_area: float = 0.001,
         max_rel_area: float = 0.4,
         iou_match_thresh: float = 0.3,
-        iou_duplicate_thresh: float = 0.2,
+        iou_duplicate_thresh: float = 0.3,
         sam_imgsz: int = 640,
     ):
         if yolo_model_path is None:
@@ -189,9 +189,11 @@ class HybridDetector(Detector):
     def detect(
         self,
         image: Union[str, Path, np.ndarray],
-        conf_threshold: float = 0.1,
-        sam_conf_threshold: float = 0.4,
-        sam_conf_high: float = 0.7,
+        conf_threshold: float = 0.40,
+        sam_conf_threshold: float = 0.3,
+        sam_conf_high: float = 0.9,
+        max_detections: int = 10,
+        conf_gap_threshold: float = 0.20,
     ) -> List[Dict[str, Any]]:
 
         size = self._get_image_size(image)
@@ -291,5 +293,18 @@ class HybridDetector(Detector):
                 }
             )
         final.sort(key=lambda d: float(d["confidence"]), reverse=True)
+
+        # Confidence-gap pruning: cut at the first large drop in confidence.
+        # Fine-tuned YOLO assigns high conf to true objects and lower conf to FPs,
+        # creating a natural gap. Only cut if ≥2 detections remain before the cut.
+        if conf_gap_threshold > 0 and len(final) >= 3:
+            for i in range(1, len(final)):
+                gap = float(final[i - 1]["confidence"]) - float(final[i]["confidence"])
+                if gap >= conf_gap_threshold and i >= 2:
+                    final = final[:i]
+                    break
+
+        if max_detections is not None and 0 < max_detections < len(final):
+            final = final[:max_detections]
 
         return final

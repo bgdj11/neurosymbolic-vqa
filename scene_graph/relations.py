@@ -8,13 +8,13 @@ class RelationConfig:
     
     # Horizontal relation thresholds
     # Objects are "left/right" if their centers differ by more than this (normalized [0,1])
-    horizontal_threshold: float = 0.05  # 5% of image width
-    horizontal_hysteresis: float = 0.02  # Hysteresis margin
+    horizontal_threshold: float = 0.01
+    horizontal_hysteresis: float = 0.005
     
     # Depth relation thresholds
     # Objects are "front/behind" if depth differs by more than this
-    depth_threshold: float = 0.1  # 10% of depth range
-    depth_hysteresis: float = 0.03
+    depth_threshold: float = 0.05
+    depth_hysteresis: float = 0.01
     
     # Minimum overlap for objects to be considered "at same position"
     position_overlap_iou: float = 0.1
@@ -55,9 +55,10 @@ class SpatialRelationComputer:
             cx = (x1 + x2) / 2
             cy = (y1 + y2) / 2
             centers.append((cx, cy))
-            
-            # Use depth_mean if available
-            depth = obj.get('depth_mean', None)
+
+            # Y-proxy: bbox bottom (y2) = where object touches ground.
+            # Higher y2 = lower in image = closer to camera → negate so larger = farther.
+            depth = -float(y2)
             depths.append(depth)
         
         # Normalize centers if image_size provided
@@ -133,18 +134,19 @@ class SpatialRelationComputer:
 
         if depth_i is None or depth_j is None:
             return None
-        
-        diff = depth_j - depth_i  # Positive means j is closer (in front)
-        
+
+        # The normalized negative bbox-bottom proxy increases with distance.
+        diff = depth_j - depth_i
+
         threshold = self.config.depth_threshold
         hysteresis = self.config.depth_hysteresis
-        
-        if diff > threshold + hysteresis:
-            return 'front'   # j is in front of i
-        elif diff < -(threshold + hysteresis):
-            return 'behind'  # j is behind i
+
+        if diff < -(threshold + hysteresis):
+            return 'front'   # j is closer to camera = j is in front of i
+        elif diff > threshold + hysteresis:
+            return 'behind'  # j is farther from camera = j is behind i
         else:
-            return None      # Too similar depth
+            return None
     
     def compute_overlap_relations(
         self,

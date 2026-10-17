@@ -15,10 +15,13 @@ OBJECT_COLORS = {
     'brown':  '#AA6633',
     'gray':   '#999999',
 }
-_FALLBACK_COLOR = '#FFFFFF'
-_GRAPH_BG  = '#16213e'
-_GRAPH_FG  = '#0f0f23'
-_AXIS_COLOR = '#888888'
+_FALLBACK_COLOR = '#AAAAAA'
+_GRAPH_BG  = 'white'
+_GRAPH_FG  = '#f5f5f5'
+_AXIS_COLOR = '#333333'
+
+def _attr_label(obj: Dict, attrs=('color', 'shape')) -> str:
+    return ' '.join(str(obj.get(attr, '?')) for attr in attrs)
 
 
 def _load_image(image) -> np.ndarray:
@@ -52,7 +55,7 @@ def _draw_image_panel(
     ax.imshow(img)
     ax.axis('off')
     objects = scene_graph.get('objects', [])
-    ax.set_title(title or f'{len(objects)} objects', fontsize=12, pad=8)
+    ax.set_title(title or 'Слика са детектованим објектима', fontsize=12, pad=8)
 
     for i, obj in enumerate(objects):
         color = _obj_color(obj)
@@ -79,8 +82,8 @@ def _draw_image_panel(
             # Label top-left of box
             ax.text(
                 x1 + 4, y1 - 4,
-                f"{obj.get('color', '?')} {obj.get('shape', '?')}",
-                ha='left', va='bottom', fontsize=7, color='white', weight='bold',
+                _attr_label(obj),
+                ha='left', va='bottom', fontsize=9, color='white', weight='bold',
                 bbox=dict(boxstyle='round,pad=0.2', facecolor='black', alpha=0.6, lw=0),
                 zorder=8,
             )
@@ -89,25 +92,25 @@ def _draw_image_panel(
         ax.plot(cx, cy, marker, markersize=18, color=color,
                 markeredgecolor='white', markeredgewidth=2, zorder=6)
         ax.text(cx, cy, str(i), ha='center', va='center',
-                fontsize=8, weight='bold', color='white', zorder=7)
+                fontsize=10, weight='bold', color='white', zorder=7)
 
 
 # Spatial scatter panel
 
-def _draw_spatial_scatter(ax: plt.Axes, scene_graph: Dict, title: str = 'Spatial Layout') -> None:
+def _draw_spatial_scatter(ax: plt.Axes, scene_graph: Dict, title: str = 'Просторни распоред') -> None:
 
     ax.set_facecolor(_GRAPH_BG)
-    ax.set_title(title, fontsize=11, color='white', pad=8)
-    ax.set_xlabel('← left          right →', color='#aaaacc', fontsize=9)
-    ax.set_ylabel('← behind        front →', color='#aaaacc', fontsize=9)
-    ax.tick_params(colors='#aaaacc', labelsize=8)
+    ax.set_title(title, fontsize=11, color='#111111', pad=8)
+    ax.set_xlabel('← лево          десно →', color=_AXIS_COLOR, fontsize=9)
+    ax.set_ylabel('← иза        испред →', color=_AXIS_COLOR, fontsize=9)
+    ax.tick_params(colors=_AXIS_COLOR, labelsize=8)
     for spine in ax.spines.values():
-        spine.set_edgecolor('#444466')
+        spine.set_edgecolor('#cccccc')
 
     objects = scene_graph.get('objects', [])
     if not objects:
-        ax.text(0.5, 0.5, 'No objects', ha='center', va='center',
-                color='gray', fontsize=11, transform=ax.transAxes)
+        ax.text(0.5, 0.5, 'Нема објеката', ha='center', va='center',
+                color='#888888', fontsize=11, transform=ax.transAxes)
         return
 
     # Extract horizontal position and depth from pixel_coords
@@ -124,30 +127,30 @@ def _draw_spatial_scatter(ax: plt.Axes, scene_graph: Dict, title: str = 'Spatial
     ds_n = [(d - d_min) / d_range for d in depths]
 
     # Grid
-    ax.grid(True, alpha=0.15, color='#5555aa', linestyle='--')
+    ax.grid(True, alpha=0.4, color='#cccccc', linestyle='--')
     ax.set_xlim(-0.18, 1.18)
     ax.set_ylim(-0.22, 1.18)
     ax.set_xticks([0, 0.5, 1])
-    ax.set_xticklabels(['left', 'center', 'right'], color='#aaaaaa', fontsize=8)
+    ax.set_xticklabels(['лево', 'центар', 'десно'], color=_AXIS_COLOR, fontsize=8)
     ax.set_yticks([0, 0.5, 1])
-    ax.set_yticklabels(['behind', 'mid', 'front'], color='#aaaaaa', fontsize=8)
+    ax.set_yticklabels(['иза', 'средина', 'испред'], color=_AXIS_COLOR, fontsize=8)
 
     for i, (obj, xn, dn) in enumerate(zip(objects, xs_n, ds_n)):
         color = _obj_color(obj)
 
         # White ring + colored fill
-        ax.scatter(xn, dn, s=700, color='white',  zorder=3)
-        ax.scatter(xn, dn, s=580, color=color,    zorder=4)
+        ax.scatter(xn, dn, s=1100, color='white',  zorder=3)
+        ax.scatter(xn, dn, s=900,  color=color,    zorder=4)
         ax.text(xn, dn, str(i), ha='center', va='center',
-                fontsize=9, weight='bold', color='white', zorder=5)
+                fontsize=13, weight='bold', color='white', zorder=5)
 
         # Short label below node
-        label = f"{obj.get('color', '?')} {obj.get('shape', '?')}"
+        label = _attr_label(obj)
         ax.annotate(
             label, xy=(xn, dn),
-            xytext=(0, -22), textcoords='offset points',
-            ha='center', va='top', fontsize=6.5, color='#dddddd',
-            bbox=dict(boxstyle='round,pad=0.2', facecolor='#1a1a3e', alpha=0.85, lw=0),
+            xytext=(0, -26), textcoords='offset points',
+            ha='center', va='top', fontsize=10, color='#222222',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#eeeeee', alpha=0.9, lw=0),
             zorder=6,
         )
 
@@ -158,27 +161,28 @@ def render_scene_graph(
     scene_graph: Dict,
     title: str = 'Scene Graph',
     show_graph: bool = True,
+    show_image: bool = True,
 ) -> plt.Figure:
 
     img = _load_image(image)
-    n = len(scene_graph.get('objects', []))
 
-    if show_graph:
-        fig = plt.figure(figsize=(17, 7))
-        ax_img   = fig.add_axes([0.02, 0.05, 0.50, 0.88])
-        ax_graph = fig.add_axes([0.55, 0.05, 0.35, 0.88])
+    if show_graph and show_image:
+        fig = plt.figure(figsize=(16, 7))
+        ax_img   = fig.add_axes([0.02, 0.05, 0.44, 0.88])
+        ax_graph = fig.add_axes([0.52, 0.05, 0.44, 0.88])
         ax_graph.set_facecolor(_GRAPH_BG)
+        _draw_image_panel(ax_img, img, scene_graph, title=title)
+        _draw_spatial_scatter(ax_graph, scene_graph)
+    elif show_graph and not show_image:
+        fig, ax_graph = plt.subplots(figsize=(8, 7))
+        ax_graph.set_facecolor(_GRAPH_BG)
+        _draw_spatial_scatter(ax_graph, scene_graph, title=title)
     else:
         fig, ax_img = plt.subplots(figsize=(10, 7))
-        ax_graph = None
+        _draw_image_panel(ax_img, img, scene_graph, title=title)
 
-    _draw_image_panel(ax_img, img, scene_graph,
-                      title=f'{title}  ({n} objects)')
-
-    if ax_graph is not None:
-        _draw_spatial_scatter(ax_graph, scene_graph)
-
-    fig.suptitle(title, fontsize=13, y=0.99)
+    if title:
+        fig.suptitle(title, fontsize=13, y=0.99)
     return fig
 
 
@@ -195,9 +199,9 @@ def compare_scene_graphs(
     fig, axes = plt.subplots(1, 2, figsize=figsize)
 
     _draw_image_panel(axes[0], img, gt_graph,
-                      title=f'Ground Truth  ({gt_n} objects)', marker='o')
+                      title=f'Референтни  ({gt_n} објеката)', marker='o')
     _draw_image_panel(axes[1], img, detected_graph,
-                      title=f'Detected  ({det_n} objects)', marker='s')
+                      title=f'Детектовано  ({det_n} објеката)', marker='s')
 
     plt.tight_layout(pad=1.5)
     return fig

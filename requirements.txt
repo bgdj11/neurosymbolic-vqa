@@ -1,7 +1,7 @@
+-r requirements/core.txt
+
 pandas>=2.0.0
-pillow>=10.0.0
 jsonlines>=4.0.0
-tqdm>=4.65.0
 
 matplotlib>=3.7.0
 seaborn>=0.12.0
@@ -15,13 +15,18 @@ ipykernel>=6.0.0
 opencv-python>=4.8.0
 scikit-image>=0.21.0
 
-pyyaml>=6.0
 python-dotenv>=1.0.0
 
-numpy>=1.24.0
 
 torch>=2.0.0
 torchvision>=0.15.0
 timm>=0.9.0
 
 ultralytics>=8.0.0
+
+transformers>=4.46.3,<5
+sentencepiece>=0.2
+accelerate>=1.0
+ftfy>=6
+regex
+clip @ git+https://github.com/openai/CLIP.git

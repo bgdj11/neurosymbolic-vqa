@@ -33,32 +33,51 @@ def union(scene_graph: SceneGraph, set1: List[int], set2: List[int]) -> List[int
     return list(set(set1) | set(set2))
 
 
+def _pick_best(scene_graph: SceneGraph, objects: List[int]) -> int:
+    def area(idx):
+        b = scene_graph.get_object(idx).get('bbox', [0, 0, 0, 0])
+        return (b[2] - b[0]) * (b[3] - b[1])
+    return max(objects, key=area)
+
+
 def unique(scene_graph: SceneGraph, objects: List[int]) -> List[int]:
-    if len(objects) != 1:
-        raise ValueError(
-            f"unique() expects exactly 1 object, got {len(objects)}: {objects}"
-        )
-    return objects
+    if len(objects) == 1:
+        return objects
+    if len(objects) == 0:
+        # Experimental fallback: select the largest bbox from the entire scene.
+        all_objs = scene_graph.all_objects()
+        if all_objs:
+            return [_pick_best(scene_graph, all_objs)]
+        raise ValueError("unique() on empty scene")
+    return [_pick_best(scene_graph, objects)]
 
 
 def query_color(scene_graph: SceneGraph, objects: List[int]) -> str:
-    if len(objects) != 1:
-        raise ValueError(f"query_color expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"query_color expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(scene_graph, objects)]
     return scene_graph.get_attribute(objects[0], 'color')
 
 def query_shape(scene_graph: SceneGraph, objects: List[int]) -> str:
-    if len(objects) != 1:
-        raise ValueError(f"query_shape expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"query_shape expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(scene_graph, objects)]
     return scene_graph.get_attribute(objects[0], 'shape')
 
 def query_size(scene_graph: SceneGraph, objects: List[int]) -> str:
-    if len(objects) != 1:
-        raise ValueError(f"query_size expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"query_size expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(scene_graph, objects)]
     return scene_graph.get_attribute(objects[0], 'size')
 
 def query_material(scene_graph: SceneGraph, objects: List[int]) -> str:
-    if len(objects) != 1:
-        raise ValueError(f"query_material expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"query_material expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(scene_graph, objects)]
     return scene_graph.get_attribute(objects[0], 'material')
 
 
@@ -94,35 +113,43 @@ def greater_than(scene_graph: SceneGraph, int1: int, int2: int) -> bool:
 
 
 def same_color(scene_graph: SceneGraph, objects: List[int]) -> List[int]:
-    if len(objects) != 1:
-        raise ValueError(f"same_color expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"same_color expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(scene_graph, objects)]
     ref_obj = objects[0]
     ref_color = scene_graph.get_attribute(ref_obj, 'color')
-    return [idx for idx in scene_graph.all_objects() 
+    return [idx for idx in scene_graph.all_objects()
             if idx != ref_obj and scene_graph.get_attribute(idx, 'color') == ref_color]
 
 def same_shape(scene_graph: SceneGraph, objects: List[int]) -> List[int]:
-    if len(objects) != 1:
-        raise ValueError(f"same_shape expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"same_shape expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(scene_graph, objects)]
     ref_obj = objects[0]
     ref_shape = scene_graph.get_attribute(ref_obj, 'shape')
-    return [idx for idx in scene_graph.all_objects() 
+    return [idx for idx in scene_graph.all_objects()
             if idx != ref_obj and scene_graph.get_attribute(idx, 'shape') == ref_shape]
 
 def same_size(scene_graph: SceneGraph, objects: List[int]) -> List[int]:
-    if len(objects) != 1:
-        raise ValueError(f"same_size expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"same_size expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(scene_graph, objects)]
     ref_obj = objects[0]
     ref_size = scene_graph.get_attribute(ref_obj, 'size')
-    return [idx for idx in scene_graph.all_objects() 
+    return [idx for idx in scene_graph.all_objects()
             if idx != ref_obj and scene_graph.get_attribute(idx, 'size') == ref_size]
 
 def same_material(sg: SceneGraph, objects: List[int]) -> List[int]:
-    if len(objects) != 1:
-        raise ValueError(f"same_material expects 1 object, got {len(objects)}: {objects}")
+    if len(objects) == 0:
+        raise ValueError(f"same_material expects 1 object, got 0")
+    if len(objects) > 1:
+        objects = [_pick_best(sg, objects)]
     ref_obj = objects[0]
     ref_material = sg.get_attribute(ref_obj, 'material')
-    return [idx for idx in sg.all_objects() 
+    return [idx for idx in sg.all_objects()
             if idx != ref_obj and sg.get_attribute(idx, 'material') == ref_material]
 
 OPERATORS = {
