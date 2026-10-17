@@ -2,7 +2,7 @@
 
 ## Figures used in the README
 
-The main figures are taken from the Serbian thesis, `DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf`. The copy restored under `docs/presentation/` has SHA-256 `8f2f8e2cd4fc981f493336d97da2627918683168ba5dce88d790eb8640d0b46a`, matching the source used for the result tables.
+The main figures are taken from the Serbian thesis, `DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf`.
 
 | README asset | Original source | Changes |
 | :--- | :--- | :--- |
@@ -14,11 +14,9 @@ The main figures are taken from the Serbian thesis, `DIPLOMSKI_RAD_BOGDAN_PDF_JU
 
 The unmodified images extracted from the PDF are saved as [source/thesis_architecture.png](source/thesis_architecture.png) and [source/thesis_training.png](source/thesis_training.png).
 
-The translations are stored in [thesis_architecture_en.svg](thesis_architecture_en.svg) and [thesis_training_en.svg](thesis_training_en.svg). Each SVG embeds the original bitmap and places editable English text over its Serbian labels. PNG exports are used in the README for consistent rendering. These are translations of the existing figures, not newly drawn diagrams or replotted measurements.
+English versions are available as [thesis_architecture_en.svg](thesis_architecture_en.svg) and [thesis_training_en.svg](thesis_training_en.svg). Each SVG contains the original figure with editable translated labels. The README uses PNG exports.
 
-The small detection and scene-graph panels in Figure 4.1 use the matching higher-resolution notebook exports, [source/detection.png](source/detection.png) and [source/scene_graph.png](source/scene_graph.png), with translated annotations. Confidence values, object positions, colors, and IDs are retained. All perception examples show saved notebook outputs; no new inference was run to produce them.
-
-The notebook's configured target is `CLEVR_val_000138`. Confirm the exact image identity against the dataset if an image identifier is needed in a publication.
+The small detection and scene-graph panels in Figure 4.1 use the matching higher-resolution notebook exports, [source/detection.png](source/detection.png) and [source/scene_graph.png](source/scene_graph.png), with translated annotations. Confidence values, object positions, colors, and IDs are unchanged.
 
 ## Attribution
 

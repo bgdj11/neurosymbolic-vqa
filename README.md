@@ -8,7 +8,15 @@ A visual question answering system built around an explicit scene representation
 
 The thesis evaluates this approach on CLEVR, CLEVR-CoGenT, and CLEVR-Humans. The experiments separate errors in visual perception from errors in question translation, and examine REINFORCE adaptation to human-written questions.
 
-[English presentation](docs/presentation/Bachelor_Thesis_Presentation_EN.pptx) · [Original presentation](docs/presentation/DIPLOMSKI-PPT.pptx) · [Experiment guide](experiments/README.md) · [Result provenance](results/README.md)
+## Project overview and presentations
+
+Click the links below to read the one-page summary or download the defense slides.
+
+| Document | Format | Language |
+| :--- | :--- | :--- |
+| [Read the one-page project summary](docs/one-page-summary.pdf) | PDF | English |
+| [Download the defense presentation](docs/presentation/Bachelor_Thesis_Presentation_EN.pptx) | PowerPoint | English |
+| [Download the original defense presentation](docs/presentation/DIPLOMSKI-PPT.pptx) | PowerPoint | Serbian |
 
 ## Results
 
@@ -138,7 +146,7 @@ python -m examples.reasoning_demo
 
 Source: thesis Table 6.2 and presentation slide 13. Rates are rounded as reported. Formal program validity does not imply that a program expresses the intended question.
 
-The CLEVR model uses supervised sequence learning. The Humans experiment samples programs and rewards their execution results over annotated scenes. The retained RL scripts use a separate sequential interpreter and a different input convention from the shared inference module; [the experiment guide](experiments/README.md) records these differences.
+The CLEVR model uses supervised sequence learning. The Humans experiment samples programs and rewards their execution results over annotated scenes. The RL scripts use a separate sequential interpreter and a different input convention from the shared inference module; see [the experiment guide](experiments/README.md).
 
 | Training setting | CLEVR supervised learning | CLEVR-Humans REINFORCE |
 | :--- | :--- | :--- |
@@ -180,7 +188,7 @@ The thesis evaluates perception on 1,000 CLEVR validation images, matching detec
 | Size | 92.8% | Behind | 44.3% |
 | | | Overall relations | 61.5% |
 
-Source: thesis Tables 6.4, 6.5 and 6.7; presentation slide 14. Attribute scores concern matched objects. The retained diagnostic scripts use different relation aggregations, so these values should be interpreted with their original thesis protocol.
+Source: thesis Tables 6.4, 6.5 and 6.7; presentation slide 14. Attribute scores concern matched objects. Relation scores depend on the aggregation method used in each evaluation script; these values follow the thesis protocol.
 
 Color accuracy ranges from 97% for green to 71% for brown. Spatial relations also remain a source of error, particularly `behind` at 44.3%.
 
@@ -203,6 +211,7 @@ configs/                Reference configuration; current defaults live in Python
 converters/             Dataset conversion and evaluation-image sampling
 dataset_analysis/       Dataset exploration notebooks and operator analysis
 docs/
+  one-page-summary.pdf  English project summary
   assets/               Translated thesis figures and original notebook outputs
   presentation/         Original and English defense presentations
 dsl/                    Types, operators, validator, scene graph, executor
@@ -220,7 +229,7 @@ scene_graph/            Graph construction, spatial relations, visualization
 tests/                  DSL and scene-graph tests
 ```
 
-Datasets, model weights, checkpoints, generated evaluation records, and local thesis drafts are excluded from Git. See [repository maintenance](docs/REPOSITORY_REVIEW.md) for the cleanup inventory and files to review before committing.
+Datasets, model weights, checkpoints, generated evaluation records, and local thesis drafts are excluded from Git.
 
 ## Installation
 
@@ -238,14 +247,14 @@ For the full perception, T5, and notebook dependencies:
 python -m pip install -r requirements.txt
 ```
 
-The requirements include the original OpenAI CLIP package from GitHub, so Git must be installed. FastSAM is imported through Ultralytics. These are dependency ranges, not a recovered lockfile from the original cloud sessions.
+The requirements include the original OpenAI CLIP package from GitHub, so Git must be installed. FastSAM is imported through Ultralytics. Dependency versions are specified as ranges; the original cloud environments do not have a lockfile.
 
 For symbolic tests and graph utilities without the neural models:
 
 ```bash
 python -m pip install -r requirements/dev.txt
 python -m examples.reasoning_demo
-python -m pytest tests/test_dsl_validator.py tests/test_executor.py tests/test_scene_graph_builder.py tests/test_review_regressions.py -m "not slow and not clevr and not clevr_full" -q
+python -m pytest -m "not slow and not clevr and not clevr_full" -q
 ```
 
 ## Data and model preparation
@@ -339,7 +348,7 @@ Notebook outputs are cleared for version control. Selected outputs are preserved
 
 The implemented DSL covers CLEVR-style attributes, sets, counting, comparisons, and four spatial directions. Superlatives, arbitrary object categories, `between`, and frequency-based selection require additional operators. The DSL coverage classifier uses lexical rules and is a diagnostic estimate rather than a proof of expressibility.
 
-This checkout retains several experimental changes made after the original committed baseline. These include a bounding-box fallback for `unique`, HSV color correction, a position-dependent size threshold, and a bounding-box-bottom proxy for front/behind relations. Some differ from the methodology described in the thesis. The final tables above report the completed thesis experiments; a new run of the current defaults is a separate experiment. [Implementation review](docs/IMPLEMENTATION_REVIEW.md) identifies the relevant files and differences.
+The current implementation includes a bounding-box fallback for `unique`, HSV color correction, a position-dependent size threshold, and a bounding-box-bottom proxy for front/behind relations. These choices differ from parts of the thesis methodology. Reproducing the reported results requires matching the experiment's checkpoint, interpreter, and perception settings.
 
 GQA and Super-CLEVR conversion utilities are retained as exploratory work. Their schemas and attribute vocabularies are not fully supported by the CLEVR executor. They are outside the main result tables.
 

@@ -2,7 +2,7 @@
 
 These scripts preserve the Colab and Kaggle workflows used during development. Most Kaggle files are Python notebook exports with `# %%` cell boundaries and runtime-specific input paths. Install dependencies before running them. They execute work at module scope and should not be imported as library modules.
 
-The main result tables are taken from the July thesis and defense presentations. The final Kaggle outputs were not retained. The scripts are research artifacts, not a recovered snapshot of every final cloud session.
+Final results are reported in the July thesis and defense presentations. The original per-question Kaggle output files are unavailable.
 
 ## Setup
 
@@ -26,7 +26,7 @@ Edit the input paths at the top of each script to match the datasets attached to
 
 The supervised T5 workflow uses the prefix `translate to DSL: `. Its initial schedule is three epochs, but the retained training history ends at approximately 0.823 epochs. The RL workflow uses unprefixed questions, samples four programs per question, and evaluates answers through its own interpreter. Do not silently substitute `NL2DSLModel` when reproducing that workflow.
 
-The RL reward implementation supports sequential programs. It does not parse explicit `:i` and `:i,j` references used by the shared DSL serializer. It retains a permissive object-selection fallback. Its KL term is computed at the first decoder position, and its baseline is the mean reward of the samples for each question. These details are preserved because changing them would define a different training experiment.
+The RL reward implementation supports sequential programs. It does not parse explicit `:i` and `:i,j` references used by the shared DSL serializer. It uses a permissive object-selection fallback. Its KL term is computed at the first decoder position, and its baseline is the mean reward of the samples for each question.
 
 The YOLO label generator constructs approximate square boxes from object centers and size categories. These are proxy labels, not rendered instance-mask boxes. Keep this distinction when describing the detector training data.
 
@@ -45,7 +45,7 @@ The heuristic mix matches scene, answer, and estimated terminal operation; this 
 
 ## Local visual diagnostics
 
-The former `tests/test_detector.py`, `tests/test_depth_estimator.py`, and `tests/test_segmenter.py` were executable visual demos rather than pytest tests. They now live in `local/`:
+Run the visual diagnostics from the repository root:
 
 ```bash
 python -m experiments.local.detector_demo

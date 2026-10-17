@@ -4,7 +4,7 @@
     "thesis": "DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf",
     "thesis_sha256": "8f2f8e2cd4fc981f493336d97da2627918683168ba5dce88d790eb8640d0b46a",
     "presentation": "docs/presentation/DIPLOMSKI-PPT.pptx",
-    "note": "Final results reported in the July thesis and defense presentation. Original Kaggle output files were not retained. These values are not a fresh evaluation of this checkout.",
+    "note": "Final results reported in the July thesis and defense presentation. Original per-question Kaggle output files are unavailable.",
     "accuracy_tables": [
       "6.2",
       "6.8"
