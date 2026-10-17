@@ -35,6 +35,7 @@ logs/
 *.pdf
 !docs/assets/*.pdf
 !docs/one-page-summary.pdf
+!docs/presentation/DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf
 *.ppt
 *.pptx
 !docs/presentation/DIPLOMSKI-PPT.pptx

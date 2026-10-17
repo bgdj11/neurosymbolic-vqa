@@ -8,19 +8,20 @@ A visual question answering system built around an explicit scene representation
 
 The thesis evaluates this approach on CLEVR, CLEVR-CoGenT, and CLEVR-Humans. The experiments separate errors in visual perception from errors in question translation, and examine REINFORCE adaptation to human-written questions.
 
-## Project overview and presentations
+## Thesis, project overview and presentations
 
-Click the links below to read the one-page summary or download the defense slides.
+Read the full thesis or the one-page summary, or download the defense slides below.
 
 | Document | Format | Language |
 | :--- | :--- | :--- |
+| [Read the full bachelor's thesis (77 pages)](docs/presentation/DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf) | PDF | Serbian (Cyrillic) |
 | [Read the one-page project summary](docs/one-page-summary.pdf) | PDF | English |
 | [Download the defense presentation](docs/presentation/Bachelor_Thesis_Presentation_EN.pptx) | PowerPoint | English |
 | [Download the original defense presentation](docs/presentation/DIPLOMSKI-PPT.pptx) | PowerPoint | Serbian |
 
 ## Results
 
-Answer accuracy reported in the Serbian thesis, `DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf`, Tables 6.2 and 6.8. The experiments ran on Kaggle and Colab. Final Kaggle output files were not retained; [thesis_reported.json](results/thesis_reported.json) records the values and their source.
+Answer accuracy reported in the [Serbian thesis](docs/presentation/DIPLOMSKI_RAD_BOGDAN_PDF_JUL.pdf), Tables 6.2 and 6.8. The experiments ran on Kaggle and Colab. Final Kaggle output files were not retained; [thesis_reported.json](results/thesis_reported.json) records the values and their source.
 
 | Dataset | Ground-truth graph | End-to-end | Perception gap |
 | :--- | ---: | ---: | ---: |
